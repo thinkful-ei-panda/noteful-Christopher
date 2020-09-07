@@ -14,13 +14,13 @@ export default function Note(props) {
       </h2>
       <button className='Note__delete' type='button'>
         <FontAwesomeIcon icon='trash-alt' />
-        {' '}
+        {''}
         remove
       </button>
-      <div className=''>
-        <div className=''>
+      <div className='Note__dates'>
+        <div className='Note__dates-modified'>
           Modified
-          {' '}
+          {''}
           <span className='Date'>
             {format(props.modified, 'Do MMM YYYY')}
           </span>

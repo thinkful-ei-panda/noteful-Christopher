@@ -24,7 +24,7 @@ class App extends Component {
     }
 
     renderNavRoutes() {
-        const {notes, folders} = this.state;
+        const { notes, folders } = this.state;
         return (
             <>
                 {['/', '/folder/:folderId'].map(path => (
@@ -44,7 +44,7 @@ class App extends Component {
                 <Route
                     path="/note/:noteId"
                     render={routeProps => {
-                        const {noteId} = routeProps.match.params;
+                        const { noteId } = routeProps.match.params;
                         const note = findNote(notes, noteId) || {};
                         const folder = findFolder(folders, note.folderId);
                         return <NotePageNav {...routeProps} folder={folder} />;
@@ -57,7 +57,8 @@ class App extends Component {
     }
 
     renderMainRoutes() {
-        const {notes, folders} = this.state;
+        // eslint-disable-next-line no-unused-vars
+        const { notes, folders } = this.state;
         return (
             <>
                 {['/', '/folder/:folderId'].map(path => (
@@ -66,7 +67,7 @@ class App extends Component {
                         key={path}
                         path={path}
                         render={routeProps => {
-                            const {folderId} = routeProps.match.params;
+                            const { folderId } = routeProps.match.params;
                             const notesForFolder = getNotesForFolder(
                                 notes,
                                 folderId
@@ -83,7 +84,7 @@ class App extends Component {
                 <Route
                     path="/note/:noteId"
                     render={routeProps => {
-                        const {noteId} = routeProps.match.params;
+                        const { noteId } = routeProps.match.params;
                         const note = findNote(notes, noteId);
                         return <NotePageMain {...routeProps} note={note} />;
                     }}
