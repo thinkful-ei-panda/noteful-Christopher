@@ -2,24 +2,63 @@ import React from 'react'
 import { NavLink, Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import CircleButton from '../CircleButton/CircleButton'
+import ApiContext from '../ApiContext'
 import { countNotesForFolder } from '../notes-helpers'
+import config from '../config'
 import './NoteListNav.css'
+import '../Note/Note.css'
 
-export default function NoteListNav(props) {
-  return (
+
+export default class NoteListNav extends React.Component {
+  static defaultProps ={
+    onDeleteFolder: () => {}
+   
+  }
+
+  static contextType = ApiContext;
+
+  handleClickDelete = e => {
+    // e.preventDefault()
+    const folderId = e.currentTarget.value
+    
+    fetch(`${config.API_ENDPOINT}/folders/${folderId}`, {
+      method: 'DELETE',
+      headers: {
+        'content-type': 'application/json'
+      }
+    })
+      .then(() => {
+        this.context.deleteFolder(folderId)
+        // allow parent to perform extra behaviour
+        this.props.onDeleteFolder(folderId)
+      })
+      .catch(error => {
+        console.error({ error })
+      })
+  }
+
+  render (){    
+    const { folders=[], notes=[] } = this.context;
+    console.log(`NoteListNav Context: ${this.context.folders}`)
+    return (
     <div className='NoteListNav'>
+
       <ul className='NoteListNav__list'>
-        {props.folders.map(folder =>
-          <li key={folder.id}>
-            <NavLink
-              className='NoteListNav__folder-link'
-              to={`/folder/${folder.id}`}
-            >
-              <span className='NoteListNav__num-notes'>
-                {countNotesForFolder(props.notes, folder.id)}
-              </span>
-              {folder.name}
+
+        {folders.map(folder =>
+          <li key={folder.id} className='note' >
+            <NavLink className='NoteListNav__folder-link' to={`/folders/${folder.id}`} >
+              {folder.folder_name}
             </NavLink>
+
+            <span className='NoteListNav__num-notes'>
+                {countNotesForFolder(notes, folder.id)}
+              </span>
+
+            <button className='folder-delete' type='button' value={folder.id}  onClick={ this.handleClickDelete} >
+                <FontAwesomeIcon icon='trash-alt' />
+                {' '}
+              </button>
           </li>
         )}
       </ul>
@@ -36,9 +75,7 @@ export default function NoteListNav(props) {
         </CircleButton>
       </div>
     </div>
-  )
+    )
+  }
 }
 
-NoteListNav.defaultProps = {
-  folders: []
-}

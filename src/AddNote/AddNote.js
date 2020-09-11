@@ -1,93 +1,84 @@
-import React, { Component } from 'react';
-import ErrorBoundary from '../ErrorBoundary'
-import PropTypes from 'prop-types';
-import '../App/App.css'; 
+import React, { Component } from 'react'
+import NotefulForm from '../NotefulForm/NotefulForm'
+import ApiContext from '../ApiContext'
+import config from '../config'
+import './AddNote.css'
 
 export default class AddNote extends Component {
-    constructor(props){
-        super(props);
-        this.state={
-            noteTitle: {
-                value: '',
-                touched: false
-            },
-            noteContent: {
-                value: '',
-                touched: false
-            }
+  static defaultProps = {
+    history: {
+      push: () => { }
+    },
+  }
+  static contextType = ApiContext;
 
-        }
+  handleSubmit = e => {
+    e.preventDefault()
+    const newNote = {
+      note_name: e.target['note-name'].value,
+      content: e.target['note-content'].value,
+      folder_id: e.target['note-folder-id'].value,
+      modified: new Date(),
     }
+    fetch(`${config.API_ENDPOINT}/notes`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(newNote),
+    })
+      .then(res => {
+        if (!res.ok)
+          return res.json().then(e => Promise.reject(e))
+        return res.json()
+      })
+      .then(note => {
+        this.context.addNote(note)
+        this.props.history.push(`/`)
+      })
+      .catch(error => {
+        console.error({ error })
+      })
+  }
 
-    updateNoteTitle(event){
-        this.setState({noteTitle: {value: '', touched: true}})
-
-    }
-
-    updateNoteContent(event){
-        this.setState({noteContent: {value: '', touched: true}})
-
-    }
-
-    validateNoteTitle() {
-        const noteTitle = this.state.noteTitle.value.trim();
-        if (noteTitle.length === 0) {
-          return 'note Title is required';
-        } else if (noteTitle.length < 3) {
-          return 'Title must be at least 3 characters long';
-        }
-      }
-
-      validateNoteContent() {
-        const noteContent = this.state.noteContent.value.trim();
-        if (noteContent.length === 0) {
-          return 'note Content is required';
-        } else if (noteContent.length < 3) {
-          return 'At least write more than one word';
-        }
-      }
-
-    render() {
-        const noteTitleError = this.validateNoteTitle();
-        const noteContentError = this.validateNoteContent();
-        return (
-            <div>
-                <form className="add-note-form" onSubmit={e => this.handleAddNoteSubmit(e)}>
-                <h2>Add Note</h2>
-
-                <div className="add-note-hint">* required field</div>
-
-                <div className="form-group">
-
-                <label htmlFor="note-title"> Title *</label>
-                <input type="text" className="note-title" name="note-title" id="note-title" onChange={e => this.updateNoteTitle(e.target.value)} />
-                
-                <ErrorBoundary message={noteTitleError}/>
-                {this.state.noteTitle.touched && <ErrorBoundary message={this.validateTitleName} />}
-                </div>
-
-                <div className="form-group">
-
-                <label htmlFor="note-content"> Content *</label>
-                <input type="text" className="note-content" name="note-content" id="note-content" onChange={e => this.updateNoteContent(e.target.value)} />
-                
-                <ErrorBoundary message={noteContentError}/>
-                {this.state.noteTitle.touched && <ErrorBoundary message={this.validateTitleName} />}
-                </div>
-
-                <div className='save-and-cancel-buttons'>
-                <button type='button' onClick={this.handleClickCancel}> Cancel </button>
-                {' '}
-                <button type='submit'> Save </button>
-                </div>
-              
-                </form>
-            </div>
-        )
-    }
+  render() {
+    const { folders=[] } = this.context
+    return (
+      <section className='AddNote'>
+        <h2>Create a note</h2>
+        <NotefulForm onSubmit={this.handleSubmit}>
+          <div className='field'>
+            <label htmlFor='note-name-input'>
+              Name
+            </label>
+            <input type='text' id='note-name-input' name='note-name' />
+          </div>
+          <div className='field'>
+            <label htmlFor='note-content-input'>
+              Content
+            </label>
+            <textarea id='note-content-input' name='note-content' />
+          </div>
+          <div className='field'>
+            <label htmlFor='note-folder-select'>
+              Folder
+            </label>
+            <select id='note-folder-select' name='note-folder-id'>
+              <option value={null}>...</option>
+              {folders.map(folder =>
+                <option key={folder.id} value={folder.id}>
+                  {folder.folder_name}
+                </option>
+              )}
+            </select>
+          </div>
+          <div className='buttons'>
+            <button type='submit'>
+              Add note
+            </button>
+          </div>
+        </NotefulForm>
+      </section>
+    )
+  }
 }
-
-AddNote.propTypes = {
-    noteTitle: PropTypes.string.isRequired,
-    noteContent: PropTypes.string.isRequired
-    };
