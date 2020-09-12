@@ -1,4 +1,3 @@
 export default {
-  API_ENDPOINT: `http://localhost:8000/API/Noteful`,
-  API_KEY: process.env.REACT_APP_API_KEY,
-}
+  API_ENDPOINT: "https://stark-thicket-28675.herokuapp.com",
+};
